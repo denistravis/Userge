@@ -86,18 +86,19 @@ async def gban_user(message: Message):
             f"\n\n**First Name:** [{firstname}](tg://user?id={user_id})\n"
             f"**User ID:** `{user_id}`\n**Reason:** `{reason}`"))
     # TODO: can we add something like "GBanned by {any_sudo_user_fname}"
-    for chat in await message.client.get_common_chats(user_id):
-        try:
-            await chat.kick_member(user_id)
-            await CHANNEL.log(
-                r"\\**#Antispam_Log**//"
-                f"\n**User:** [{firstname}](tg://user?id={user_id})\n"
-                f"**User ID:** `{user_id}`\n"
-                f"**Chat:** {chat.title}\n"
-                f"**Chat ID:** `{chat.id}`\n"
-                f"**Reason:** `{reason}`\n\n$GBAN #id{user_id}")
-        except ChatAdminRequired:
-            pass
+    if not message.client.is_bot:
+        for chat in await message.client.get_common_chats(user_id):
+            try:
+                await chat.kick_member(user_id)
+                await CHANNEL.log(
+                    r"\\**#Antispam_Log**//"
+                    f"\n**User:** [{firstname}](tg://user?id={user_id})\n"
+                    f"**User ID:** `{user_id}`\n"
+                    f"**Chat:** {chat.title}\n"
+                    f"**Chat ID:** `{chat.id}`\n"
+                    f"**Reason:** `{reason}`\n\n$GBAN #id{user_id}")
+            except ChatAdminRequired:
+                pass
     LOG.info("G-Banned %s", str(user_id))
     try:
         if message.reply_to_message:
@@ -136,17 +137,18 @@ async def ungban_user(message: Message):
             r"\\**#UnGbanned_User**//"
             f"\n\n**First Name:** [{firstname}](tg://user?id={user_id})\n"
             f"**User ID:** `{user_id}`"))
-    for chat in await message.client.get_common_chats(user_id):
-        try:
-            await chat.unban_member(user_id)
-            await CHANNEL.log(
-                r"\\**#Antispam_Log**//"
-                f"\n**User:** [{firstname}](tg://user?id={user_id})\n"
-                f"**User ID:** `{user_id}`\n"
-                f"**Chat:** {chat.title}\n"
-                f"**Chat ID:** `{chat.id}`\n\n$UNGBAN #id{user_id}")
-        except ChatAdminRequired:
-            pass
+    if not message.client.is_bot:
+        for chat in await message.client.get_common_chats(user_id):
+            try:
+                await chat.unban_member(user_id)
+                await CHANNEL.log(
+                    r"\\**#Antispam_Log**//"
+                    f"\n**User:** [{firstname}](tg://user?id={user_id})\n"
+                    f"**User ID:** `{user_id}`\n"
+                    f"**Chat:** {chat.title}\n"
+                    f"**Chat ID:** `{chat.id}`\n\n$UNGBAN #id{user_id}")
+            except ChatAdminRequired:
+                pass
     LOG.info("UnGbanned %s", str(user_id))
 
 
@@ -256,8 +258,7 @@ async def list_white(message: Message):
         f"**--Whitelisted Users List--**\n\n{msg}" if msg else "`whitelist empty!`")
 
 
-@userge.on_filters(Filters.group & Filters.new_chat_members & ~Filters.me,
-                   group=1, check_client=True)
+@userge.on_filters(Filters.group & Filters.new_chat_members & ~Filters.me, group=1)
 async def gban_at_entry(message: Message):
     """ handle gbans """
     chat_id = message.chat.id
