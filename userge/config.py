@@ -15,10 +15,9 @@ from typing import Set
 
 import heroku3
 from git import Repo
-from pyrogram import Filters
+from pyrogram import filters
 
-from userge import logbot
-from userge import logging
+from userge import logging, logbot
 from . import versions
 
 _REPO = Repo()
@@ -69,14 +68,16 @@ class Config:
     MAX_MESSAGE_LENGTH = 4096
     MSG_DELETE_TIMEOUT = 120
     WELCOME_DELETE_TIMEOUT = 120
+    EDIT_SLEEP_TIMEOUT = 10
     AUTOPIC_TIMEOUT = 300
-    ALLOWED_CHATS = Filters.chat([])
+    ALLOWED_CHATS = filters.chat([])
     ALLOW_ALL_PMS = True
     USE_USER_FOR_CLIENT_CHECKS = False
     SUDO_ENABLED = False
     SUDO_USERS: Set[int] = set()
     ALLOWED_COMMANDS: Set[str] = set()
     ANTISPAM_SENTRY = False
+    RUN_DYNO_SAVER = False
     HEROKU_APP = None
     STATUS = None
 
@@ -96,7 +97,7 @@ def get_version() -> str:
     """ get userge version """
     ver = f"{versions.__major__}.{versions.__minor__}.{versions.__micro__}"
     if "/usergeteam/userge" in Config.UPSTREAM_REPO.lower():
-        diff = list(_REPO.iter_commits('v0.1.6..HEAD'))  # temp solution
+        diff = list(_REPO.iter_commits(f'v{ver}..HEAD'))
         if diff:
             return f"{ver}-patch.{len(diff)}"
     else:
